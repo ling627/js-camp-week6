@@ -22,11 +22,9 @@ const ADMIN_TOKEN = process.env.API_KEY;
  * @returns {Promise<Array>} - 回傳 products 陣列
  */
 async function getProducts() {
-	// 請實作此函式
-	// 提示：
-	// 1. 使用 fetch() 發送 GET 請求
-	// 2. 使用 response.json() 解析回應
-	// 3. 回傳 data.products
+	const response = await fetch(`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/products`);
+	const data = await response.json();
+	return data.products;
 }
 
 /**
@@ -34,7 +32,13 @@ async function getProducts() {
  * @returns {Promise<Object>} - 回傳 { carts: [...], total: 數字, finalTotal: 數字 }
  */
 async function getCart() {
-	// 請實作此函式
+	const response = await fetch(`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`);
+	const data = await response.json();
+	return {
+		carts: data.carts,
+		total: data.total,
+		finalTotal: data.finalTotal
+	};
 }
 
 /**
@@ -42,12 +46,19 @@ async function getCart() {
  * @returns {Promise<Object>} - 回傳 { success: boolean, data?: [...], error?: string }
  */
 async function getProductsSafe() {
-	// 請實作此函式
-	// 提示：
-	// 1. 加上 try-catch 處理錯誤
-	// 2. 檢查 response.ok 判斷是否成功
-	// 3. 成功回傳 { success: true, data: [...] }
-	// 4. 失敗回傳 { success: false, error: '錯誤訊息' }
+	try {
+		const response = await fetch(`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/products`);
+		const data = await response.json();
+		return {
+			success: true,
+			data: data.products
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error: error.message
+		};
+	}
 }
 
 // ========================================
@@ -61,12 +72,21 @@ async function getProductsSafe() {
  * @returns {Promise<Object>} - 回傳更新後的購物車資料
  */
 async function addToCart(productId, quantity) {
-	// 請實作此函式
-	// 提示：
-	// 1. 發送 POST 請求
-	// 2. body 格式：{ data: { productId: "xxx", quantity: 1 } }
-	// 3. 記得設定 headers: { 'Content-Type': 'application/json' }
-	// 4. body 要用 JSON.stringify() 轉換
+	const response = await fetch(
+		`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`,
+		{
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				data: {
+					productId: productId,
+					quantity: quantity
+				}
+			})
+		}
+	);
+	const data = await response.json();
+	return data;
 }
 
 /**
@@ -76,10 +96,21 @@ async function addToCart(productId, quantity) {
  * @returns {Promise<Object>} - 回傳更新後的購物車資料
  */
 async function updateCartItem(cartId, quantity) {
-	// 請實作此函式
-	// 提示：
-	// 1. 發送 PATCH 請求
-	// 2. body 格式：{ data: { id: "購物車ID", quantity: 數量 } }
+	const response = await fetch(
+		`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts`,
+		{
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				data: {
+					id: cartId,
+					quantity: quantity
+				}
+			})
+		}
+	);
+	const data = await response.json();
+	return data;
 }
 
 /**
@@ -88,8 +119,12 @@ async function updateCartItem(cartId, quantity) {
  * @returns {Promise<Object>} - 回傳更新後的購物車資料
  */
 async function removeCartItem(cartId) {
-	// 請實作此函式
-	// 提示：發送 DELETE 請求到 /carts/{id}
+	const response = await fetch(
+		`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts/${cartId}`,
+		{ method: 'DELETE' }
+	);
+	const data = await response.json();
+	return data;
 }
 
 /**
@@ -97,8 +132,12 @@ async function removeCartItem(cartId) {
  * @returns {Promise<Object>} - 回傳清空後的購物車資料
  */
 async function clearCart() {
-	// 請實作此函式
-	// 提示：發送 DELETE 請求到 /carts
+	const response = await fetch(
+		`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/carts/`,
+		{ method: 'DELETE' }
+	);
+	const data = await response.json();
+	return data;
 }
 
 // ========================================
@@ -110,14 +149,24 @@ async function clearCart() {
 
 1. HTTP 狀態碼的分類（1xx, 2xx, 3xx, 4xx, 5xx 各代表什麼）
    答：
-
+	1xx：請求已收到，但還沒完成
+	2xx：請求成功完成
+	3xx：需要做額外動作（例如：301 自動跳轉 URL）
+	4xx：請求有問題（通常為 client 端問題，例如：400 請求格式錯誤）
+	5xx：伺服器壞掉或處理失敗（通常為 Server 端問題，例如：500 伺服器錯誤）
 2. GET、POST、PATCH、PUT、DELETE 的差異
    答：
-
+	GET：查詢
+	POST：新增
+	PUT：整筆覆蓋（完整更新）
+	PATCH：局部修改（部分更新）
+	DELETE：刪除
 3. 什麼是 RESTful API？
    答：
-
-
+	RESTful API 是一種設計網路服務的風格
+	基於 Representational State Transfer（簡稱 REST）原則來建立 API（應用程式介面）
+	讓不同系統可以透過 HTTP 互相溝通
+	簡單來說是用 HTTP 方法 + URL 來表示操作資料的規則
 */
 
 // ========================================
