@@ -48,6 +48,12 @@ async function getCart() {
 async function getProductsSafe() {
 	try {
 		const response = await fetch(`${BASE_URL}/api/livejs/v1/customer/${API_PATH}/products`);
+		if (!response.ok) {
+			return {
+				success: false,
+				error: `連線失敗：${response.status}`
+			};
+		}
 		const data = await response.json();
 		return {
 			success: true,
